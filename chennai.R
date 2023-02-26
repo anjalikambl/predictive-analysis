@@ -1,0 +1,47 @@
+d=read.csv("C:/Users/HP/Downloads/Chennai_1990_2022_Madras.csv")
+d=d[,!apply(is.na(d),2,all)]
+d
+str(d)
+d$time=as.Date(d$time,format("%d-%m-%Y"))
+
+
+#split the data a train and test
+data_train=subset(d,time<=as.Date("2015-12-31"))
+tail(data_train)
+data_test=subset(d,time>as.Date("2015-12-31"))
+tail(data_test)
+plot(data_train$time,data_train$tavg,pch=20)
+plot(data_train$time[1:(3*365)],data_train$tavg[1:(3*365)],pch=20,ylab='avg temp')
+##mod1
+
+##fit a model 1
+omega=2*pi/365
+n=nrow(d)
+d$tms=1:n
+d$tms=d$tms-mean(d$tms)
+data_train=subset(d,time<=as.Date("2015-12-31"))
+tail(data_train)
+data_test=subset(d,time>as.Date("2015-12-31"))
+tail(data_test)
+mod1=lm(tavg~tms+sin(omega*tms)+cos(omega*tms),data=data_train)
+sum=summary(mod1)
+sigma=sum$sigma
+
+data_train$fitted.values=NA
+data_train[rownames(mod1$model),'fitted.values']=mod1$fitted.values
+plot(data_train$time,data_train$tavg,pch=20,xlab='',col='grey')
+
+plot(data_train$time[1:(3*365)],data_train$tavg[1:(3*365)],pch=20,col='grey')
+lines(data_train$time[1:(3*365)],data_train$fitted.values[1:(3*365)],pch=20,col='red')
+
+lines(data_train$time[1:(3*365)],data_train$fitted.values[1:(3*365)]-1.96*sigma,pch=20,col='green',lwd=2,lty=2)
+
+lines(data_train$time[1:(3*365)],data_train$fitted.values[1:(3*365)]+1.96*sigma,pch=20,col='green',lwd=2,lty=2)
+
+#do prediction in test data
+
+data_test$pred=predict(mod1,newdata=data_test)
+plot(data_test$time,data_test$tavg,col="grey",pch=20)
+lines(data_test$time,data_test$pred,col='red',lwd=2)
+lines(data_test$time,data_test$pred-1.96*sigma,col='green',lwd=3,lty=2)
+lines(data_test$time,data_test$pred+1.96*sigma,col='green',lwd=3,lty=2)

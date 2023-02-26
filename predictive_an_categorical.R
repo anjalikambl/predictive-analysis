@@ -1,0 +1,17 @@
+y=c(28,23,14,27,33,36,34,29,18,21,20,22,11,14,11,16)
+data=matrix(y,nrow=4,byrow=T)
+colnames(data)=c('Toxin1','Toxin2','Toxin3','Toxin4')
+data
+apply(data,2,mean)
+treatment=c(rep('Toxin1',4),rep('Toxin2',4),rep('Toxin3',4),rep('Control',4))
+df=cbind.data.frame(y,treatment)
+df
+mod=lm(y~treatment,data=df)
+mod
+summary(mod)
+X=model.matrix(mod)
+X
+b=solve(t(X)%*%X)%*%t(X)%*%y
+b
+coef(mod)
+cbind.data.frame(coef(mod),b)
